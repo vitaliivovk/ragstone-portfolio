@@ -1,0 +1,39 @@
+---
+description: Task-driven development workflow with docs/TASKS.md tracking
+alwaysApply: true
+---
+
+# Task Workflow
+
+When working on project tasks, follow this workflow:
+
+## Before Starting Work
+
+1. **Read `docs/TASKS.md`** to understand the task context, requirements, and current status
+2. **Create a feature branch** for the task (e.g., `feature/migrate-to-uv`, `fix/citation-links`)
+3. Never work directly on `main` branch for task implementation
+
+## During Work
+
+Update `docs/TASKS.md` on major milestones:
+- Key implementation decisions made
+- Blockers encountered or resolved
+- Significant progress that changes task scope
+
+## After Implementation
+
+1. **Deploy/build** if applicable (e.g., redeploy Azure Functions, rebuild Docker image)
+2. **Ask user to test** - do NOT mark task as complete until user confirms testing passed
+3. Only after successful testing:
+   - Update task status to `✅ Completed` in `docs/TASKS.md`
+   - Commit all changes including `docs/TASKS.md` updates
+   - Inform user that work is ready for merge
+
+## Status Reference
+
+| Status | Meaning |
+|--------|---------|
+| `📋 To Do` | Not started |
+| `🔄 In Progress` | Currently working |
+| `🔄 Deferred` | Paused/blocked |
+| `✅ Completed` | Done |

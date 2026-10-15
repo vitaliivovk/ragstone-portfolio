@@ -1,0 +1,17 @@
+// Recent prod audits where user or assistant text mentions kaucja / weryfikacja (Polish).
+traces
+| where timestamp > ago(14d)
+| where message startswith "RAG_TURN_AUDIT "
+| where message contains "kaucj" or message contains "weryfik" or message contains "Kaucj" or message contains "Weryfik"
+| extend payload = substring(message, 15)
+| extend j = parse_json(payload)
+| project
+    timestamp,
+    trace_id = tostring(j.azure_invocation_id),
+    user_message = tostring(j.user_message),
+    answer_preview = substring(tostring(j.assistant_response), 0, 800),
+    needs_rag = tostring(j.needs_rag),
+    doc_count = toint(j.retrieved_document_count),
+    paths = tostring(j.retrieved_documents)
+| order by timestamp desc
+| take 25

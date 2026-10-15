@@ -1,0 +1,32 @@
+// Per-turn appear-delay breakdown: from turn_begin to first informative POST.
+// Run: docker compose -f docker-compose.dev.yml run --rm -T dev bash /workspace/scripts/run_kql.sh -b workspace -t PT2H -o table scripts/kql/investigate_appear_delay.kql
+let key_steps = dynamic([
+    "turn_begin",
+    "orchestration_streamer_ready",
+    "teams_botframework_post",
+    "orchestration_first_model_token_received",
+    "answer_split_for_delivery",
+    "turn_complete"
+]);
+AppTraces
+| where TimeGenerated > ago(2h)
+| where Message startswith "TEAMS_TURN_LATENCY"
+| extend payload = substring(Message, 19)
+| extend j = parse_json(payload)
+| extend trace = tostring(j.trace_id), step = tostring(j.step)
+| where step in (key_steps)
+| project
+    TimeGenerated,
+    trace,
+    step,
+    elapsed_ms = todouble(j.elapsed_ms),
+    outbound_case = tostring(j.outbound_case),
+    stream_type = tostring(j.stream_type),
+    http_status = tostring(j.http_status),
+    http_ms = tostring(j.http_ms),
+    body_msg_count = tostring(j.body_message_count),
+    answer_chars = tostring(j.answer_chars),
+    outcome = tostring(j.outcome),
+    error_preview = tostring(j.error_preview)
+| order by trace asc, TimeGenerated asc
+| take 200

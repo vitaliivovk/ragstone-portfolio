@@ -1,0 +1,6 @@
+// Smoke: latest RAG audits (any) — confirms App Insights query works.
+traces
+| where timestamp > ago(3d)
+| where message startswith "RAG_TURN_AUDIT "
+| project timestamp, message
+| take 5

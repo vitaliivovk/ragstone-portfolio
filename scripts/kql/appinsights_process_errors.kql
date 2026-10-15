@@ -1,0 +1,7 @@
+// Recent bot handler errors (Log Analytics / AppTraces). Use: run_kql.sh -b workspace -t P1D scripts/kql/appinsights_process_errors.kql
+AppTraces
+| where TimeGenerated > ago(12h)
+| where Message has "Error in process_message"
+| project TimeGenerated, Message
+| order by TimeGenerated desc
+| take 12

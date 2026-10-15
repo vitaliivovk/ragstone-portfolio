@@ -1,0 +1,12 @@
+// Dev: recent RAG audits, user-stopped streams, length truncation warnings, latency outcomes.
+// Run: docker compose -f docker-compose.dev.yml run --rm -T dev bash /workspace/scripts/run_kql.sh -b workspace -t P2D -o table scripts/kql/dev_recent_turns_and_stops.kql
+AppTraces
+| where TimeGenerated > ago(2d)
+| where Message has "RAG_TURN_AUDIT"
+    or Message has "User stopped the streaming response"
+    or Message has "finish_reason=length"
+    or (Message startswith "TEAMS_TURN_LATENCY" and Message has "user_stopped_stream")
+| extend msg = strcat(substring(Message, 0, 220), iff(strlen(Message) > 220, "…", ""))
+| project TimeGenerated, msg
+| order by TimeGenerated desc
+| take 80

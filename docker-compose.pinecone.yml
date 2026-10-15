@@ -1,0 +1,20 @@
+# Run from repo root: docker compose -f docker-compose.pinecone.yml build
+# Full corpus: docker compose -f docker-compose.pinecone.yml run --rm pinecone-indexer
+# Single file(s): docker compose -f docker-compose.pinecone.yml run --rm pinecone-indexer \
+#   uv run python scripts/reindex_files.py --force "5 Instrukcje/foo.docx"
+#
+# Ensure .env contains OPENAI_API_KEY, PINECONE_API_KEY, and SEND_TO_PINECONE=1 when indexing.
+# With SEND_TO_PINECONE=1, span summaries run by default (extra chat API use). Opt out: GENERATE_SUMMARIES=0 in .env.
+services:
+  pinecone-indexer:
+    build:
+      context: ./pinecone-pipeline
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      DOCS_DIR: /data/docs
+      CHUNK_OUTPUT_DIR: /data/chunk_output
+    volumes:
+      - ./pinecone-pipeline/source_data:/data/docs:ro
+      - ./pinecone-pipeline/chunk_output:/data/chunk_output

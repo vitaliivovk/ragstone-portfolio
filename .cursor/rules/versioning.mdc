@@ -1,0 +1,28 @@
+# Teams App Versioning
+
+When updating the Teams app manifest (`teams-app/manifest.json`), follow semantic versioning:
+
+## Version Format: MAJOR.MINOR.PATCH
+
+- **MAJOR** (X.0.0): Big features, breaking changes, architectural changes
+  - Examples: New backend architecture, major UX overhaul, new platform support
+  
+- **MINOR** (0.X.0): Any other changes, new features, enhancements
+  - Examples: New bot commands, UI improvements, additional endpoints
+  
+- **PATCH** (0.0.X): Bug fixes only
+  - Examples: Typo fixes, minor bug fixes
+
+## After Changing Version
+
+Always rebuild the Teams app package after updating the manifest:
+
+```powershell
+cd teams-app
+Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath northwind-ai.zip -Force
+```
+
+## Current Version History
+
+- **3.0.0**: New Azure Functions backend with streaming support (replaced N8n)
+- **1.0.0**: Initial N8n-based implementation

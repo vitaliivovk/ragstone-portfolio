@@ -1,0 +1,31 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ragstone-dev
+    volumes:
+      # Mount the entire project
+      - .:/workspace
+      # Mount Azure CLI config for persistence
+      - azure-config:/root/.azure
+      # Mount Terraform plugin cache for faster init
+      - terraform-plugins:/root/.terraform.d/plugin-cache
+    environment:
+      # Terraform plugin cache
+      - TF_PLUGIN_CACHE_DIR=/root/.terraform.d/plugin-cache
+      # Pass through environment variables from .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      # Azure Table Storage (conversation memory); same keys as teams-bot config
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - AzureWebJobsStorage=${AzureWebJobsStorage:-}
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    # Keep container running
+    command: /bin/bash
+
+volumes:
+  azure-config:
+  terraform-plugins:

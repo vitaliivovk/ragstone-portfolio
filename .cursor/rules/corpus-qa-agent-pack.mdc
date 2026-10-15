@@ -1,0 +1,20 @@
+---
+description: Grounded corpus Q&A using pipeline chunk export (no script API key); fill agent tables in agent_exports
+globs: pinecone-pipeline/agent_exports/**
+alwaysApply: false
+---
+
+# Corpus Q&A for agents (no OpenAI in scripts)
+
+Part of **bot-quality-evaluation** / KB prep. Load `.cursor/skills/bot-quality-evaluation/SKILL.md` for full eval workflows.
+
+1. From repo root: `./scripts/kb.sh qa-export --seed <n>` (optional: `--count`, `--max-context-tokens`, `--out path`).
+2. Open **`pinecone-pipeline/agent_exports/corpus_qa_for_cursor.md`** (or custom `--out`).
+3. For each **Document** section: read chunk excerpts, fill the **Agent — fill in** table from quoted chunks only.
+
+Optional JSON: `--format json --out agent_exports/bundle.json`.
+
+Only use **`--fill-with-openai`** if the user explicitly wants API-filled JSON and has `OPENAI_API_KEY` set.
+
+Validate with `./scripts/bot.sh rag` / `probe` — see [corpus-qa-evaluation.md](../skills/bot-quality-evaluation/corpus-qa-evaluation.md).
+

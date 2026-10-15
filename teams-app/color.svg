@@ -1,0 +1,20 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="88" fill="#2B579A"/>
+  
+  <!-- NW text -->
+  <text x="96" y="115" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="72" 
+        font-weight="bold" 
+        fill="white" 
+        text-anchor="middle">NW</text>
+  
+  <!-- Small AI indicator -->
+  <text x="96" y="145" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="20" 
+        fill="white" 
+        text-anchor="middle" 
+        opacity="0.9">AI</text>
+</svg>

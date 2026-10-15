@@ -1,0 +1,21 @@
+// RAG audit rows for rent / czynsz / pay questions (dev App Insights traces API)
+traces
+| where timestamp > ago(7d)
+| where message startswith "RAG_TURN_AUDIT"
+| where message contains "pay" or message contains "rent" or message contains "czynsz" or message contains "How to"
+| order by timestamp desc
+| take 25
+| extend payload = substring(message, 15)
+| extend j = parse_json(payload)
+| project
+    timestamp,
+    user_message = tostring(j.user_message),
+    needs_rag = tobool(j.needs_rag),
+    optimized_query = tostring(j.optimized_query),
+    retrieval_scope = tostring(j.retrieval_scope),
+    retrieval_k = toint(j.retrieval_k),
+    retrieval_fallback_unfiltered = tobool(j.retrieval_fallback_unfiltered),
+    pinecone_namespace = tostring(j.pinecone_namespace),
+    retrieved_document_count = toint(j.retrieved_document_count),
+    azure_invocation_id = tostring(j.azure_invocation_id),
+    retrieved_documents = j.retrieved_documents

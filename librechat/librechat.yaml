@@ -1,0 +1,54 @@
+# LibreChat version
+# Pin upstream image/tag in your compose override; this file is config-only (soft fork).
+
+version: 1.2.1
+
+cache: true
+
+interface:
+  customWelcome: "Witaj w Northwind Assistant. Zadaj pytanie dotyczące dokumentacji lub procesów — odpowiedzi opierają się na firmowej bazie wiedzy."
+  temporaryChat: false
+  modelSelect: false
+  parameters: false
+  presets: false
+  multiConvo: false
+  bookmarks: false
+  memories: false
+  prompts: false
+  agents:
+    use: true
+    create: false
+    share: false
+  marketplace:
+    use: false
+
+# Disable bundled upload-RAG API unless you explicitly need ad-hoc "chat with this file".
+# Keep empty / omit ragEndpoints so the only model is our custom endpoint below.
+
+endpoints:
+  custom:
+    - name: "Northwind Residences RAG"
+      apiKey: "${RAG_WEB_API_KEY}"
+      baseURL: "http://host.docker.internal:8081/v1"
+      models:
+        default:
+          - "ragstone"
+        fetch: false
+      titleConvo: true
+      titleModel: "ragstone"
+      modelDisplayLabel: "Northwind Assistant"
+      # Stream Polish pipeline status into LibreChat thinking UI.
+      customParams:
+        reasoningKey: "reasoning_content"
+      # Identity for context cache / preferences (not Table Storage history).
+      headers:
+        X-User-ID: "{{LIBRECHAT_USER_OPENIDID}}"
+        X-Conversation-ID: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+        Authorization: "Bearer ${RAG_WEB_API_KEY}"
+
+# Optional: drop default OpenAI/Anthropic/etc. endpoints in your deployment so users
+# cannot pick other models. Prefer Admin Panel + this YAML over forking the React app.
+
+# MCP plugins (Phase 3): do not enable live Graph until Entra consent + OBO smoke.
+# Example registration (commented): see mcp-servers.example.yaml
+# mcpServers: {}

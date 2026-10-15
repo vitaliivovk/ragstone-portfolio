@@ -1,0 +1,64 @@
+{
+  "id": "standard_client_reply",
+  "version": "1",
+  "tenant_id": null,
+  "title": "Standard client reply",
+  "description": "Gather handbook context, optionally glance at SharePoint, compose a fixed-format email draft. Never sends.",
+  "inputs": [
+    {
+      "name": "client_name",
+      "type": "string",
+      "description": "Client or company display name",
+      "required": true
+    },
+    {
+      "name": "client_email",
+      "type": "email",
+      "description": "Client reply-to address (draft only)",
+      "required": true
+    },
+    {
+      "name": "topic",
+      "type": "string",
+      "description": "Short topic label for the subject line",
+      "required": true
+    },
+    {
+      "name": "question",
+      "type": "text",
+      "description": "Client question to answer from company sources",
+      "required": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "gather_policy",
+      "type": "rag_query",
+      "query_template": "{{question}}",
+      "top_k": 3,
+      "namespace_hint": null
+    },
+    {
+      "id": "glance_sharepoint",
+      "type": "plugin_call",
+      "plugin": "sharepoint",
+      "tool": "sharepoint_search",
+      "scope": "search",
+      "arguments": {
+        "query": "{{topic}}"
+      }
+    },
+    {
+      "id": "compose_body",
+      "type": "llm_transform",
+      "prompt_template": "Draft a professional Polish email reply to {{client_name}} about {{topic}}. Client question: {{question}}. Use the retrieved policy context.",
+      "input_refs": ["gather_policy", "glance_sharepoint"]
+    }
+  ],
+  "output_template": {
+    "artifact_type": "email_draft",
+    "subject_template": "Re: {{topic}} — {{client_name}}",
+    "body_template": "To: {{client_email}}\n\n{{compose_body_text}}\n\n---\nŹródła (stub):\n{{gather_policy_excerpt}}\n",
+    "never_send": true
+  }
+}

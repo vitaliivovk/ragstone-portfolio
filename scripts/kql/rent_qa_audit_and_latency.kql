@@ -1,0 +1,70 @@
+// Latest "How to pay for a rent?" — trace_id row, audit summary, then TEAMS_TURN_LATENCY steps (elapsed_ms = wall from turn start).
+let trace_id = toscalar(
+    traces
+    | where timestamp > ago(3d)
+    | where message startswith "RAG_TURN_AUDIT "
+    | where message contains "How to pay for a rent"
+    | order by timestamp desc
+    | take 1
+    | extend payload = substring(message, 15)
+    | extend j = parse_json(payload)
+    | project tostring(j.azure_invocation_id)
+);
+let lat_prefix = "TEAMS_TURN_LATENCY ";
+union (
+    print
+        row_type = "00_trace_id",
+        step = "",
+        elapsed_ms = 0.0,
+        segment_ms = real(null),
+        http_ms = real(null),
+        delta_ms = real(null),
+        detail = trace_id
+),
+(
+    traces
+    | where timestamp > ago(3d)
+    | where message startswith "RAG_TURN_AUDIT "
+    | extend payload = substring(message, 15)
+    | extend j = parse_json(payload)
+    | where tostring(j.azure_invocation_id) == trace_id
+    | take 1
+    | project
+        row_type = "01_audit",
+        step = "RAG_TURN_AUDIT",
+        elapsed_ms = 0.0,
+        segment_ms = real(null),
+        http_ms = real(null),
+        delta_ms = real(null),
+        detail = strcat(
+            "needs_rag=",
+            tostring(j.needs_rag),
+            " retrieval_k=",
+            tostring(j.retrieval_k),
+            " docs=",
+            tostring(j.retrieved_document_count),
+            " ns=",
+            tostring(j.pinecone_namespace),
+            " | ",
+            substring(tostring(j.optimized_query), 0, 120)
+        )
+),
+(
+    traces
+    | where timestamp > ago(3d)
+    | where message startswith lat_prefix
+    | extend p = substring(message, strlen(lat_prefix))
+    | extend lj = parse_json(p)
+    | where tostring(lj.trace_id) == trace_id
+    | sort by toreal(lj.elapsed_ms) asc
+    | extend em = toreal(lj.elapsed_ms)
+    | extend delta_ms = em - prev(em, 1, 0.0)
+    | project
+        row_type = "02_latency",
+        step = tostring(lj.step),
+        elapsed_ms = em,
+        segment_ms = toreal(lj.segment_ms),
+        http_ms = toreal(lj.http_ms),
+        delta_ms,
+        detail = strcat(tostring(lj.outbound_case), " ", tostring(lj.branch), " ", tostring(lj.outcome))
+)

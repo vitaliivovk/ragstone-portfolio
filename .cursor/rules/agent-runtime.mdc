@@ -1,0 +1,24 @@
+---
+description: Route agent work to project skills; minimal Docker image names
+alwaysApply: true
+---
+
+# Agent routing
+
+| Intent | Skill (load `SKILL.md` first) |
+|--------|-------------------------------|
+| Corpus, Pinecone, SharePoint paths, KB state | `knowledge-base-curator` |
+| Deploy, Terraform, prod changelog | `deployment-ops` |
+| Test answers, golden, audit forensics | `bot-quality-evaluation` |
+
+Gateway rules: `.cursor/rules/*-gateway.mdc`. Router: [`AGENTS.md`](../../AGENTS.md).
+
+## Docker images (names only)
+
+| Service | Image file | Use |
+|---------|------------|-----|
+| `dev` | `Dockerfile.dev` | `kql.sh`, `terraform.sh`, `deploy.sh` |
+| `bot-test` | `Dockerfile.bot` | `bot.sh` |
+| `pinecone-indexer` | `pinecone-pipeline/Dockerfile` | `kb.sh` |
+
+Details: [`.cursor/skills/deployment-ops/docker-images.md`](../../.cursor/skills/deployment-ops/docker-images.md). Rebuild when baked `requirements.txt` / `pyproject.toml` changes.

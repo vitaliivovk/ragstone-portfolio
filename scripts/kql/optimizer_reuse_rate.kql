@@ -1,0 +1,37 @@
+// Cache-aware optimizer effectiveness over the last 24h:
+//   - how often was the optimizer SHOWN a cached retrieval (presence rate)
+//   - how often it actually picked reuse / augment / none (decision distribution)
+//   - average cache age at decision time (trend signal for stale-cache hygiene)
+//
+// Run: docker compose -f docker-compose.dev.yml run --rm -T dev bash /workspace/scripts/run_kql.sh -b workspace -t P1D -o table scripts/kql/optimizer_reuse_rate.kql
+let window = 1d;
+let parsed =
+    AppTraces
+    | where TimeGenerated > ago(window)
+    | where Message startswith "RAG_TURN_AUDIT"
+    | extend payload = substring(Message, 15)
+    | extend j = parse_json(payload)
+    | extend
+        needs_rag = tobool(j.needs_rag),
+        reuse = tostring(j.reuse_previous_context),
+        cache_seen = tobool(j.optimizer_saw_cached_retrieval),
+        cache_age_min = todouble(j.cached_retrieval_age_min);
+let rag_only = parsed | where needs_rag == true;
+let totals =
+    rag_only
+    | summarize
+        rag_turns = count(),
+        with_cache_shown = countif(cache_seen == true),
+        avg_cache_age_min = round(avg(cache_age_min), 2);
+let by_decision =
+    rag_only
+    | summarize n = count() by reuse
+    | extend reuse = iff(reuse == "" or isnull(reuse), "(unset)", reuse);
+totals
+| extend stat = "totals"
+| project stat, rag_turns, with_cache_shown, avg_cache_age_min
+| union (
+    by_decision
+    | extend stat = strcat("decision=", reuse)
+    | project stat, rag_turns = n
+)

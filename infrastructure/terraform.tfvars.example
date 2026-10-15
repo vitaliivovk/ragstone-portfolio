@@ -1,0 +1,30 @@
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to git!
+
+environment = "dev"
+location    = "westeurope"
+
+# Tenant / subscription: prefer TF_VAR_tenant_id / TF_VAR_subscription_id (or .env via scripts/terraform.sh)
+# tenant_id       = "00000000-0000-0000-0000-000000000000"
+# subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# API Keys (sensitive - never commit actual values)
+openai_api_key   = "sk-your-openai-api-key"
+pinecone_api_key = "your-pinecone-api-key"
+
+# Pinecone configuration
+pinecone_index_name = "text-embedding-3-small"
+pinecone_namespace  = "v3"
+
+# SharePoint library folder (same layout as source_data); optional — citation deep links
+# sharepoint_library_base_url = "https://yourtenant.sharepoint.com/sites/SiteName/Shared%20Documents/AI/dev"
+
+# OpenAI (optional; defaults match pinecone-pipeline / teams-bot)
+# openai_model = "gpt-5-mini"
+# openai_optimizer_model = "gpt-5-nano"
+# openai_embedding_model = "text-embedding-3-small"
+
+# Optional: Additional tags
+tags = {
+  Customer = "NorthwindResidences"
+}

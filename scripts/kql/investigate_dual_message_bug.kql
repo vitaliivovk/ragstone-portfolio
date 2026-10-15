@@ -1,0 +1,39 @@
+// Investigate the "two messages shown" bug: find recent turns where Teams returned
+// 403 ContentStreamNotAllowed, and dump the surrounding outbound POST sequence so
+// we can see which step (send_chunk / send_final) failed and how many fallback
+// send_message calls fired afterwards.
+//
+// Run: docker compose -f docker-compose.dev.yml run --rm -T dev bash /workspace/scripts/run_kql.sh -b workspace -t PT2H -o table scripts/kql/investigate_dual_message_bug.kql
+let window = ago(2h);
+let bad_traces =
+    AppTraces
+    | where TimeGenerated > window
+    | where Message startswith "TEAMS_TURN_LATENCY"
+    | extend payload = substring(Message, 19)
+    | extend j = parse_json(payload)
+    | where tostring(j.step) == "teams_botframework_post"
+    | where tobool(j.ok) == false and toint(j.http_status) == 403
+    | where tostring(j.error_preview) has_cs "ContentStreamNotAllowed"
+    | distinct trace = tostring(j.trace_id);
+AppTraces
+| where TimeGenerated > window
+| where Message startswith "TEAMS_TURN_LATENCY"
+| extend payload = substring(Message, 19)
+| extend j = parse_json(payload)
+| extend trace = tostring(j.trace_id), step = tostring(j.step)
+| where trace in (bad_traces)
+| where step in ("teams_botframework_post", "answer_split_for_delivery", "turn_begin", "turn_complete", "orchestration_authoritative_stream_end")
+| project
+    TimeGenerated,
+    trace,
+    step,
+    case = tostring(j.outbound_case),
+    ok = tostring(j.ok),
+    http = tostring(j.http_status),
+    code_preview = substring(tostring(j.error_preview), 0, 80),
+    chars = tostring(j.text_chars),
+    seq = tostring(j.stream_sequence),
+    body_msgs = tostring(j.body_message_count),
+    reason = tostring(j.reason)
+| order by trace asc, TimeGenerated asc
+| take 200

@@ -1,0 +1,1 @@
+traces | where timestamp > ago(2h) | where message contains "clear" or message contains "clean" or message contains "history" or message contains "slash" or message contains "Failed" | project timestamp, severityLevel, message, operation_Name | order by timestamp desc | take 80

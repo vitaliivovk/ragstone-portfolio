@@ -1,0 +1,5 @@
+AppExceptions
+| where TimeGenerated > ago(1d)
+| project TimeGenerated, ProblemId, OuterMessage, InnermostMessage, Details
+| order by TimeGenerated desc
+| take 25

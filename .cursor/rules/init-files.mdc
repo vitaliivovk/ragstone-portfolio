@@ -1,0 +1,25 @@
+---
+description: Keep __init__.py files empty without comments
+globs: **/__init__.py
+alwaysApply: false
+---
+
+# Empty __init__.py Files
+
+`__init__.py` files should be completely empty with no content.
+
+```python
+# ❌ BAD
+# RAGStone Pinecone Pipeline
+# Document processing and vector database indexing
+```
+
+```python
+# ✅ GOOD
+(empty file)
+```
+
+Do not add:
+- Comments
+- Docstrings
+- Imports (unless explicitly needed for re-exports)

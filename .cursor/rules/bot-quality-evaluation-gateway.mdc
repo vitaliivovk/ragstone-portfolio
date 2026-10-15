@@ -1,0 +1,31 @@
+---
+description: Bot answer evaluation and RAG forensics must use the bot-quality-evaluation skill
+alwaysApply: true
+---
+
+# Bot quality evaluation gateway
+
+**Regression testing**, **golden questions**, **RAG_TURN_AUDIT forensics**, and **expected-answer checks** must follow **`.cursor/skills/bot-quality-evaluation`**.
+
+## Load the skill when the user asks to
+
+- Test whether the bot answered correctly
+- Investigate a bad Teams turn (prod or dev)
+- Run golden / acceptance-criteria checks
+- Compare retrieval vs expected documents
+
+## If the skill is not loaded
+
+1. Read `.cursor/skills/bot-quality-evaluation/SKILL.md` before KQL, pytest, or `run_local_rag_tests.py`.
+2. Use [acceptance-criteria.md](../../.cursor/skills/bot-quality-evaluation/acceptance-criteria.md), not ad-hoc expectations.
+
+## Coordination
+
+| Finding | Skill |
+|---------|--------|
+| Corpus / index fix | `knowledge-base-curator` |
+| Ship fix to Azure | `deployment-ops` |
+
+**Scripts:** `scripts/bot.sh`, `scripts/kql.sh`. **Runtime:** `bot-test` / `dev` — see skill workflow.
+
+**Narrow exception:** filling `pinecone-pipeline/agent_exports/` tables only — skill § Corpus Q&A export; no live bot eval required.

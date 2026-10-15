@@ -1,0 +1,53 @@
+---
+description: Teams bot RAG — no hardcoded routing or business rules; use LLM, corpus, retrieval
+globs: teams-bot/rag/**,teams-bot/tests/**
+alwaysApply: false
+---
+
+# Teams bot — no hardcoded routing or policy answers
+
+Do **not** encode routing or **business outcomes** (kwoty, limity miesięcy, „zawsze 1000 zł”, „max 4× czynsz”) in Python **or** in prompts/composer text. Polish phrasing varies; policy lives in **indexed documents**. The bot should **retrieve the right chunks** and answer **only from CONTEXT**.
+
+## Forbidden (without explicit user request)
+
+**Code**
+- Regex/substring checks on user text to rewrite `optimized_query`, `retrieval_scopes`, or answers.
+- Fixed clarification templates tied to keywords.
+- `if "kaucja" in query` (or similar) to force scopes, topics, or direct_mode.
+
+**Prompts / composer (`prompts.py`, `answer_composer.py`, optimizer text)**
+- Baking in **specific amounts, caps, or document-choice outcomes** (e.g. „nie podawaj 1000 zł chyba że zamiana”, „użyj min 1 / max 4 miesiące czynszu”).
+- Telling the model which **answer** to give for a scenario instead of which **folder/file family** to search or how to behave when CONTEXT conflicts.
+
+## Prefer instead
+
+1. **Router prompt + folder map** — *structural* hints: corpus slugs, subfolders, „optimized_query = bieżąca tura only”, „gdy niepewność → clarify or `all`”. Map **(N)/(W)/(R)** to filenames, not fee numbers.
+2. **Clarification** — LLM-generated questions when scenario/doc family is ambiguous.
+3. **Retrieval** — scopes, path prefixes, anchor, score ranking, context cap so **Przedłużenie**-type chunks can surface when relevant.
+4. **Answer prompt (general)** — prefer higher **trafność**; on conflict between documents, **name both files** and clarify; **no facts not in CONTEXT** (already in `SYSTEM_PROMPT`).
+5. **Corpus docs** — optional indexed „kiedy który wzór” guide; fee rules stay in **Przedłużenie** templates, not in bot code/prompts.
+6. **Tests + KQL** — regressions drive prompt/corpus fixes, not new keyword guards.
+
+## Examples
+
+```python
+# BAD — keyword router
+if "wcześniejsze" in user_msg.lower():
+    strategy.retrieval_scopes = [RetrievalScope.NAJEM_INSTYTUCJONALNY]
+```
+
+```
+# BAD — prompt hardcodes policy
+"Nie podawaj 1000 zł chyba że zamiana. Dla 24 miesięcy podaj max 4 miesiące czynszu."
+
+# OK — prompt hardcodes process only
+"Odpowiadaj wyłącznie z CONTEXT. Gdy fragmenty się różnią, wymień oba pliki i doprecyzuj scenariusz."
+```
+
+```python
+# OK — feature-flag coercion (infra, not policy)
+if direct_mode == HANDBOOK and not handbook_direct_enabled():
+    needs_rag = True
+```
+
+When answers are wrong, fix **retrieval + structural routing + corpus** — not embedded policy in prompts.

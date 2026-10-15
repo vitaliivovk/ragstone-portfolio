@@ -1,0 +1,16 @@
+// Full audit payload for the 24-month early termination turn (2026-05-28 dev smoke)
+traces
+| where timestamp between (datetime(2026-05-28T13:20:00Z) .. datetime(2026-05-28T13:30:00Z))
+| where message startswith "RAG_TURN_AUDIT "
+| extend j = parse_json(substring(message, 15))
+| where tostring(j.user_message) == "Ile wynosi opłata za wcześniejsze rozwiązanie umowy na 24 miesiące?"
+| project
+    timestamp,
+    retrieved_document_count = j.retrieved_document_count,
+    retrieved_documents = j.retrieved_documents,
+    context_chunk_ids = j.context_chunk_ids,
+    pinecone_metadata_filter = j.pinecone_metadata_filter,
+    retrieval_scope = j.retrieval_scope,
+    retrieval_fallback_unfiltered = j.retrieval_fallback_unfiltered,
+    answer_topic = j.answer_topic,
+    numeric_answer_first = j.numeric_answer_first

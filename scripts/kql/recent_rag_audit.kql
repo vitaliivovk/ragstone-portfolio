@@ -1,0 +1,21 @@
+// Recent RAG turn audits (paste in Log Analytics → Logs on workspace log-northwind-dev)
+AppTraces
+| where TimeGenerated > ago(3d)
+| where Message startswith "RAG_TURN_AUDIT"
+| extend payload = substring(Message, 15) // after "RAG_TURN_AUDIT "
+| extend j = parse_json(payload)
+| extend user_message = tostring(j.user_message)
+| where user_message has "оплата" or user_message has "оренду" or user_message has "найму"
+| project
+    TimeGenerated,
+    user_message,
+    optimized_query = tostring(j.optimized_query),
+    retrieval_k = toint(j.retrieval_k),
+    retrieval_scope = tostring(j.retrieval_scope),
+    corpus_path_prefixes = j.corpus_path_prefixes,
+    needs_rag = tobool(j.needs_rag),
+    retrieved_document_count = toint(j.retrieved_document_count),
+    retrieval_fallback = tobool(j.retrieval_fallback_unfiltered),
+    pinecone_filter = j.pinecone_metadata_filter
+| order by TimeGenerated desc
+| take 20

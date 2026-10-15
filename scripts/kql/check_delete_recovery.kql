@@ -1,0 +1,43 @@
+// Inspect the most recent ContentStreamNotAllowed turn and check whether
+// teams_botframework_delete fired and what status it returned.
+let window = ago(30m);
+let bad_traces =
+    AppTraces
+    | where TimeGenerated > window
+    | where Message startswith "TEAMS_TURN_LATENCY"
+    | extend payload = substring(Message, 19)
+    | extend j = parse_json(payload)
+    | where tostring(j.step) == "teams_botframework_post"
+    | where tobool(j.ok) == false and toint(j.http_status) == 403
+    | where tostring(j.error_preview) has_cs "ContentStreamNotAllowed"
+    | distinct trace = tostring(j.trace_id);
+AppTraces
+| where TimeGenerated > window
+| where Message startswith "TEAMS_TURN_LATENCY"
+| extend payload = substring(Message, 19)
+| extend j = parse_json(payload)
+| extend trace = tostring(j.trace_id), step = tostring(j.step)
+| where trace in (bad_traces)
+| where step in (
+    "teams_botframework_post",
+    "teams_botframework_delete",
+    "answer_split_for_delivery",
+    "turn_begin",
+    "turn_complete",
+    "orchestration_authoritative_stream_end"
+)
+| project
+    TimeGenerated,
+    trace,
+    step,
+    case = tostring(j.outbound_case),
+    ok = tostring(j.ok),
+    http = tostring(j.http_status),
+    code_preview = substring(tostring(j.error_preview), 0, 80),
+    chars = tostring(j.text_chars),
+    seq = tostring(j.stream_sequence),
+    body_msgs = tostring(j.body_message_count),
+    deleted = tostring(j.partial_bubble_deleted),
+    reason = tostring(j.reason)
+| order by trace asc, TimeGenerated asc
+| take 200

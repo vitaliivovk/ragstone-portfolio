@@ -1,0 +1,22 @@
+// Per-step timings for one Teams turn (trace_id = Azure Functions invocation_id = RAG audit azure_invocation_id).
+// Edit trace_id, then: scripts/run_kql.sh scripts/kql/turn_latency_by_trace.kql
+let trace_id = "00000000-0000-0000-0000-000000000000";
+let prefix = "TEAMS_TURN_LATENCY ";
+traces
+| where timestamp > ago(14d)
+| where message startswith prefix
+| extend payload = substring(message, strlen(prefix))
+| extend j = parse_json(payload)
+| where tostring(j.trace_id) == trace_id
+| project
+    timestamp,
+    step = tostring(j.step),
+    elapsed_ms = toreal(j.elapsed_ms),
+    segment_ms = toreal(j.segment_ms),
+    http_ms = toreal(j.http_ms),
+    outbound_case = tostring(j.outbound_case),
+    branch = tostring(j.branch),
+    outcome = tostring(j.outcome),
+    ok = tostring(j.ok)
+| sort by elapsed_ms asc
+| extend delta_from_prev_ms = elapsed_ms - prev(elapsed_ms, 1, 0.0)

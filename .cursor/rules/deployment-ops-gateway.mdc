@@ -1,0 +1,37 @@
+---
+description: Deploy and Terraform must use the deployment-ops skill
+alwaysApply: true
+---
+
+# Deployment gateway
+
+**Terraform apply**, **`deploy-fast` / `deploy-full`**, and **production changelog** updates must follow **`.cursor/skills/deployment-ops`**.
+
+## Load the skill when the user asks to
+
+- Deploy bot to dev or prod
+- Run `terraform plan/apply`
+- Fix Function App / infra settings
+- Append [`docs/deployments/CHANGELOG.md`](../../docs/deployments/CHANGELOG.md)
+
+## If the skill is not loaded
+
+1. Do not run deploy/terraform scripts ad hoc from memory.
+2. Read `.cursor/skills/deployment-ops/SKILL.md` first.
+
+## Changelog
+
+Prod deploys: append [`docs/deployments/CHANGELOG.md`](../../docs/deployments/CHANGELOG.md) in the same session as `./scripts/deploy.sh prod` on **`release`**. Read-only sessions do not require changelog writes.
+
+## Coordination
+
+| Related work | Skill |
+|--------------|--------|
+| Corpus / Pinecone / SharePoint files | `knowledge-base-curator` |
+| Evaluate answers after deploy | `bot-quality-evaluation` |
+
+**Changelog:** same session as prod deploy; SHA on `release`. Append [`docs/deployments/CHANGELOG.md`](../../docs/deployments/CHANGELOG.md).
+
+**Scripts:** `scripts/terraform.sh`, `scripts/deploy.sh` (or `terraform.cmd` / `deploy.cmd` on Windows). **Infra spec:** [`infrastructure/README.md`](../../infrastructure/README.md).
+
+Runtime: **`dev`** Docker image — [`.cursor/skills/deployment-ops/docker-images.md`](../../.cursor/skills/deployment-ops/docker-images.md).

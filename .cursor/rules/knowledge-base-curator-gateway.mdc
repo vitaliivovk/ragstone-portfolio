@@ -1,0 +1,41 @@
+---
+description: All knowledge base operations (read and write) must use the knowledge-base-curator skill
+alwaysApply: true
+---
+
+# Knowledge base gateway
+
+## Single skill for all KB work
+
+**Every** knowledge-base action — **read-only or mutating** — must go through skill **`.cursor/skills/knowledge-base-curator`**:
+
+- Read/list corpus under `pinecone-pipeline/source_data/`, chunk JSONL, routing prompts, `corpus_metadata.py`
+- Explain indexing, namespaces, SharePoint citation layout, change history (`docs/knowledge-base/CHANGELOG.md`)
+- Run read-only probes (`probe_pinecone_retrieval.py`, validate namespace, KQL on retrieved docs)
+- Add, edit, delete corpus files; Pinecone upsert/delete; routing edits; SharePoint sync; dev/prod promotion
+
+**Why:** KB process and commands live in one skill; change approach there only.
+
+## If you are not operating with that skill loaded
+
+1. **Do not** touch KB surfaces yourself (even reads like `source_data/` or Pinecone probes).
+2. **Load** `.cursor/skills/knowledge-base-curator/SKILL.md` (or tell the user to start a chat with `@knowledge-base-curator`).
+3. Then perform the request under that skill’s rules.
+
+**Exception:** Q&A table fill under `pinecone-pipeline/agent_exports/` only — [corpus-qa-agent-pack.mdc](corpus-qa-agent-pack.mdc). If the task also needs general KB context, use the curator skill first.
+
+## Approval
+
+| Tier | Gate |
+|------|------|
+| **Read-only** | No approval — execute immediately under the skill |
+| **Mutations (dev)** | Plan → human **`approve`** → feature branch, `v3` |
+| **Mutations (prod)** | Dev user sign-off → second plan → **`approve`** → **`release`**, `production` |
+
+## Changelog
+
+Mutations: update [`docs/knowledge-base/CHANGELOG.md`](../../docs/knowledge-base/CHANGELOG.md) and commit with the change. Read-only sessions do not require changelog writes.
+
+The curator must **always inform the human** about duplication/corruption risks (see skill § Data integrity) in mutation plans, after Pinecone writes, and when audits find skew.
+
+**Scripts:** `scripts/kb.sh` (Pinecone), optional `kb.sh sharepoint`. Process: [`.cursor/skills/knowledge-base-curator/SKILL.md`](../../.cursor/skills/knowledge-base-curator/SKILL.md) and [workflow.md](../../.cursor/skills/knowledge-base-curator/workflow.md).

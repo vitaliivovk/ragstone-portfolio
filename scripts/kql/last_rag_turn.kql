@@ -1,0 +1,21 @@
+// Latest completed bot turn (RAG audit) — dev App Insights / traces
+traces
+| where timestamp > ago(7d)
+| where message startswith "RAG_TURN_AUDIT"
+| order by timestamp desc
+| take 1
+| extend payload = substring(message, 15)
+| extend j = parse_json(payload)
+| project
+    timestamp,
+    azure_invocation_id = tostring(j.azure_invocation_id),
+    teams_user_name = tostring(j.teams_user_name),
+    user_message = tostring(j.user_message),
+    needs_rag = tostring(j.needs_rag),
+    optimized_query = tostring(j.optimized_query),
+    retrieval_k = tostring(j.retrieval_k),
+    pinecone_namespace = tostring(j.pinecone_namespace),
+    retrieved_document_count = tostring(j.retrieved_document_count),
+    answer_depth = tostring(j.answer_depth),
+    output_truncated_by_max_tokens = tostring(j.output_truncated_by_max_tokens),
+    assistant_preview = tostring(substring(j.assistant_response, 0, 240))

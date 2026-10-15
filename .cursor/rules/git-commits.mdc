@@ -1,0 +1,46 @@
+# Git Commits and Pushes
+
+**CRITICAL: Only commit and push when explicitly requested by the user.**
+
+## Rules
+
+1. **DO NOT** automatically commit changes after making edits
+2. **DO NOT** automatically push changes to remote
+3. **ONLY** create commits when the user:
+   - Explicitly says "commit" or "commit these changes"
+   - Asks to "save to git" or similar
+   - Says "push" or "push to git"
+4. **ALWAYS** ask the user if they want to commit/push if unclear
+
+## Examples
+
+### ❌ BAD - Don't do this automatically
+```
+User: "Update the workflow file"
+Assistant: [Updates file, commits, and pushes]
+```
+
+### ✅ GOOD - Ask first
+```
+User: "Update the workflow file"
+Assistant: [Updates file] "I've updated the workflow file. Would you like me to commit and push these changes?"
+```
+
+### ✅ GOOD - User explicitly requests
+```
+User: "Update the workflow file and commit it"
+Assistant: [Updates file, commits, and pushes]
+```
+
+## When to Commit
+
+- User says: "commit", "git commit", "save to git", "push to git"
+- User asks to "save these changes permanently"
+- After completing a major feature if user requested it upfront
+
+## Never Commit Without Permission
+
+- After bug fixes
+- After minor edits
+- After creating new files
+- When making multiple related changes (wait for user to ask)

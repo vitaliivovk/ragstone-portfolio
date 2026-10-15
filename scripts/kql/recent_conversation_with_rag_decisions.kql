@@ -1,0 +1,25 @@
+// Recent dev conversation timeline: per-turn user_message, optimizer needs_rag,
+// optimized_query, optimizer reasoning, retrieved sources, and answer preview.
+// Goal: spot turns that fired RAG but could have been answered from previously
+// retrieved context already sitting in the conversation history.
+//
+// Run: docker compose -f docker-compose.dev.yml run --rm -T dev bash /workspace/scripts/run_kql.sh -b workspace -t PT4H -o table scripts/kql/recent_conversation_with_rag_decisions.kql
+AppTraces
+| where TimeGenerated > ago(4h)
+| where Message startswith "RAG_TURN_AUDIT"
+| extend payload = substring(Message, 15)
+| extend j = parse_json(payload)
+| project
+    ts = TimeGenerated,
+    user_id_prefix = substring(tostring(j.teams_user_id), 0, 12),
+    user_msg = tostring(j.user_message),
+    needs_rag = tostring(j.needs_rag),
+    optimized_query = tostring(j.optimized_query),
+    retrieval_scope = tostring(j.retrieval_scope),
+    optimizer_reasoning = tostring(j.optimizer_reasoning),
+    n_docs = toint(j.retrieved_document_count),
+    answer_chars = toint(j.assistant_response_chars),
+    answer_preview = substring(tostring(j.assistant_response), 0, 200),
+    pinecone_filter = tostring(j.pinecone_metadata_filter)
+| order by ts asc
+| take 60

@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Environment variables and secrets
+pinecone_key
+
+# Output directories
+csv_output/
+chunk_output/
+
+# Corpus (local-only; not shipped in portfolio copy). Ignore bulk files; allow map + readme.
+source_data/*
+!source_data/README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# uv lock file (each dev regenerates)
+uv.lock

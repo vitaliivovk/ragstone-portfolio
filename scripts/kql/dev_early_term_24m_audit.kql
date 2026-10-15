@@ -1,0 +1,24 @@
+// Dev: RAG turns about early termination / 24 months (retrieval forensics)
+traces
+| where timestamp > ago(7d)
+| where message startswith "RAG_TURN_AUDIT "
+| extend j = parse_json(substring(message, 15))
+| where tostring(j.user_message) has "wcześniejsze"
+    or tostring(j.user_message) has "wczesniejsze"
+    or (tostring(j.user_message) has "24" and tostring(j.user_message) has "miesi")
+| project
+    timestamp,
+    user_message = tostring(j.user_message),
+    response_path = tostring(j.response_path),
+    clarification_needed = tobool(j.clarification_needed),
+    clarification_questions = tostring(j.clarification_questions),
+    needs_rag = tobool(j.needs_rag),
+    answer_topic = tostring(j.answer_topic),
+    numeric_answer_first = tobool(j.numeric_answer_first),
+    optimized_query = tostring(j.optimized_query),
+    retrieval_scopes = tostring(j.retrieval_scopes),
+    retrieval_k = tostring(j.retrieval_k),
+    retrieved_documents = j.retrieved_documents,
+    assistant_preview = substring(tostring(j.assistant_response), 0, 200)
+| order by timestamp desc
+| take 10

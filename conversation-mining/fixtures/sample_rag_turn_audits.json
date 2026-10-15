@@ -1,0 +1,92 @@
+{
+  "audits": [
+    {
+      "event": "RAG_TURN_AUDIT",
+      "channel": "web",
+      "conversation_id": "web-conv-aa11",
+      "teams_user_id": "entra-oid-alice",
+      "teams_user_name": "Alice",
+      "user_message": "Proszę przygotować standardową odpowiedź do klienta w sprawie kaucji.",
+      "assistant_response": "Oto szkic odpowiedzi…",
+      "needs_rag": true,
+      "optimized_query": "standardowa odpowiedź klient kaucja zwrot",
+      "retrieval_scope": "najem_instytucjonalny",
+      "search_focus": "fees",
+      "response_path": "rag",
+      "answer_topic": "deposit_reply",
+      "retrieved_documents": [
+        {
+          "sourceRelativePath": "1 Najem instytucjonalny/Kaucja/Instrukcja.docx",
+          "fileName": "Instrukcja.docx",
+          "docId": "doc-kaucja-1",
+          "chunkIndex": 2,
+          "sectionTitle": "Zwrot kaucji"
+        }
+      ],
+      "context_chunk_ids": ["doc-kaucja-1:2"]
+    },
+    {
+      "event": "RAG_TURN_AUDIT",
+      "channel": "web",
+      "conversation_id": "web-conv-bb22",
+      "teams_user_id": "entra-oid-bob",
+      "teams_user_name": "Bob",
+      "user_message": "Draft a standard client email about the security deposit return.",
+      "assistant_response": "Draft: …",
+      "needs_rag": true,
+      "optimized_query": "client email security deposit return policy",
+      "retrieval_scope": "najem_instytucjonalny",
+      "search_focus": "fees",
+      "response_path": "rag",
+      "answer_topic": "deposit_reply",
+      "retrieved_documents": [
+        {
+          "sourceRelativePath": "1 Najem instytucjonalny/Kaucja/FAQ.docx",
+          "fileName": "FAQ.docx",
+          "docId": "doc-kaucja-2",
+          "chunkIndex": 0,
+          "sectionTitle": "FAQ"
+        }
+      ],
+      "context_chunk_ids": ["doc-kaucja-2:0"]
+    },
+    {
+      "event": "RAG_TURN_AUDIT",
+      "channel": "web",
+      "conversation_id": "web-conv-cc33",
+      "teams_user_id": "entra-oid-carol",
+      "teams_user_name": "Carol",
+      "user_message": "cześć",
+      "assistant_response": "Dzień dobry!",
+      "needs_rag": false,
+      "optimized_query": "",
+      "retrieval_scope": "",
+      "response_path": "smalltalk",
+      "answer_topic": "none",
+      "retrieved_documents": [],
+      "context_chunk_ids": []
+    },
+    {
+      "event": "RAG_TURN_AUDIT",
+      "channel": "teams",
+      "conversation_id": "19:teams-thread",
+      "teams_user_id": "29:aad-xyz",
+      "teams_user_name": "Dave",
+      "user_message": "kaucja?",
+      "assistant_response": "…",
+      "needs_rag": true,
+      "optimized_query": "kaucja",
+      "retrieval_scope": "najem_instytucjonalny",
+      "response_path": "rag",
+      "answer_topic": "deposit_reply",
+      "retrieved_documents": [
+        {
+          "sourceRelativePath": "1 Najem instytucjonalny/Kaucja/Instrukcja.docx",
+          "fileName": "Instrukcja.docx",
+          "docId": "doc-kaucja-1",
+          "chunkIndex": 1
+        }
+      ]
+    }
+  ]
+}

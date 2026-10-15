@@ -1,0 +1,22 @@
+# Local bot testing — Python 3.11 + preinstalled teams-bot deps (matches Azure Functions runtime).
+# Rebuild after requirements.txt changes: docker compose -f docker-compose.bot.yml build bot-test
+#
+# Examples (repo root):
+#   ./scripts/bot.sh pytest tests/ -q
+#   ./scripts/bot.sh rag --file logs/client_feedback_golden.txt
+#   ./scripts/bot.sh run func start   # needs teams-bot/local.settings.json
+services:
+  bot-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    env_file:
+      - ./.env
+    environment:
+      PYTHONPATH: /workspace/teams-bot
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/teams-bot
+    stdin_open: true
+    tty: true
+    command: /bin/bash

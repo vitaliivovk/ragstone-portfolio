@@ -1,0 +1,32 @@
+// Client feedback — retrieval_scope=all on narrow tenant queries (misroute audit)
+// Companion: .cursor/skills/bot-quality-evaluation/acceptance-criteria.md (A5, A17, prod turns with scope=all)
+//
+// Run in production App Insights (same window as prod_client_feedback_may2026.kql).
+
+traces
+| where timestamp between (datetime(2026-05-11T00:00:00Z) .. datetime(2026-05-15T00:00:00Z))
+| where message startswith "RAG_TURN_AUDIT "
+| extend payload = substring(message, 15)
+| extend j = parse_json(payload)
+| extend
+    teams_user_name = tostring(j.teams_user_name),
+    user_message = tostring(j.user_message),
+    needs_rag = tobool(j.needs_rag),
+    optimized_query = tostring(j.optimized_query),
+    retrieval_scope = tostring(j.retrieval_scope),
+    retrieved_document_count = toint(j.retrieved_document_count)
+| where needs_rag == true
+| where retrieval_scope == "all"
+| where user_message has_any (
+    "wcześniejsz", "wczesniejsz", "rozwiązania umowy", "rozwiazania umowy",
+    "kaucj", "weryfikac", "24 mies", "36 mies", "12 mies"
+)
+| project
+    timestamp,
+    teams_user_name,
+    user_message,
+    optimized_query,
+    retrieval_scope,
+    retrieved_document_count,
+    trace_id = tostring(j.azure_invocation_id)
+| order by timestamp asc
